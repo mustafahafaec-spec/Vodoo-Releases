@@ -1,68 +1,104 @@
-# Vodoo v0.1.0
+# Vodoo v0.2.0 — Odoo Employee Timesheet Organizer
 
-**Vodoo** is a .NET 8 / C# WinForms employee-side task and timesheet organizer for Odoo. It operates using the permissions of the signed-in employee. The Manager mode is visible as **Under Construction**; creating Odoo Project tasks is not provided in Employee mode.
+**Vodoo** is a Windows desktop organizer for Odoo projects, tasks and employee
+timesheets. It works with the permissions of your existing Odoo employee account.
+It does not create Odoo Project tasks in Employee mode.
 
-## Requirements
+## Install Vodoo (Windows 10/11 x64)
 
-- Windows 10/11 x64, Visual Studio 2022 17.8+ and .NET 8 SDK for development.
-- For the published self-contained application, a separate .NET runtime installation is not required.
-- An Odoo account with API access and permissions for the relevant Project tasks and Timesheets operations. Supports JSON-2 (Odoo 19+) and XML-RPC (Odoo 16–18), both over HTTPS.
-- [Inno Setup 6](https://jrsoftware.org/isinfo.php) to compile the installer `.iss` on Windows.
+Choose **ONE** installer. Both install the same application, share the same
+public upgrade identity and keep account-local preferences/credentials intact:
 
-## End-user workflow
+| Edition | Installer filename | When to use |
+| --- | --- | --- |
+| Full / offline | `Vodoo_Setup_v0.2.0.exe` | Recommended for general distribution. Includes the .NET 8 Desktop Runtime; does not need a separate runtime installation. This is the canonical asset selected by Vodoo's verified public auto-updater. |
+| Lite / smaller download | `Vodoo_Setup_v0.2.0_Lite.exe` | Requires **Microsoft .NET 8 Desktop Runtime x64**, already installed on the computer. The installer contains Vodoo and its dependencies but not the Windows desktop runtime. |
 
-Connect to Odoo, then open **Employee → Project View** to browse projects in colored circles, mark favorites with crowns, navigate to tasks and subtasks, and add timesheet drafts against existing tasks. In **Timesheet**, choose a day on the calendar, enter entries in the editable Project / Task / Description / Hours / Date / State grid, or **Match Another Day** to stage eligible entries. Review the staged operations and click **Confirm To Odoo** to submit them. Existing entries can be selected for staged deletion, subject to Odoo permissions. Some submissions may succeed before others fail; do not blindly resubmit unverified entries.
+The Lite edition is smaller primarily because it does not duplicate .NET on
+machines that already have it. The two installers are alternatives, not a
+two-stage installation. If your PC does not have the required runtime, choose
+**Full**. Alternatively, install the official [Microsoft .NET 8 Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+(x64, Desktop Runtime — not only the ASP.NET Core or base .NET Runtime) before
+running Lite.
 
-## Light and dark themes
+**Runtime support note:** This version targets .NET 8, for which Microsoft's
+support ends **November 10, 2026**. A migration to a supported LTS framework
+should be evaluated before continuing long-term public deployment. The
+framework target has deliberately not been changed without a compatibility
+build and GUI regression test.
 
-Click **Light Mode** or **Dark Mode** in the main toolbar. The theme is saved locally for the current Windows user and restored on the next launch. Existing connection preferences and saved API key handling remain unchanged. The user-interface theme does not affect Odoo.
+## Connect to Odoo
 
-## Description signature
+Open **Connect to Odoo**. For Odoo 19+ use HTTPS URL, choose **JSON-2** and
+enter your API key; the login/email field is not required for this protocol.
+For Odoo 16–18, choose **XML-RPC** and provide the required database, login
+and API key.
 
-On confirmed timesheet creation, the Odoo `account.analytic.line.name` field receives the description followed by the exact marker:
+Use **API Key → How to get** to open an offline five-step tutorial with
+screenshots. The fifth sample screenshot has its key value redacted; do not
+share or log your own API key.
 
-`(Written By VoOdO)`
+The footer has **Forget** on the left and **Connect**, then **Cancel** on
+the right. All three buttons have equal height. **Remember last connection**
+uses Windows Credential Manager to store a key in the current Windows account;
+the key is not written to preferences JSON or application logs. **Forget**
+deletes that saved local credential, not an Odoo account or server task.
 
-Vodoo hides that marker when reading existing timesheets, rendering rows, matching days, and generating task-specific description suggestions. The marker is not part of the editable description shown in Vodoo, and is not appended repeatedly. Existing Odoo project-task description text containing the marker is also suppressed from the corresponding Vodoo display. The marker **is intentionally visible in Odoo**, where it identifies records created by Vodoo. It is not added to a task's `project.task.description` when recording time; it is appended to the **timesheet activity description** only.
+## Employee workflows
 
+- **Project View:** Browse employee-accessible projects and their tasks,
+  navigate subtasks, search/filter and mark project favorites.
+- **Timesheet, By Day:** Review individual recorded entries, stage new entries,
+  edit descriptions/hours/dates and select an existing project/task with
+  intelligent type-ahead suggestions.
+- **Timesheet, By Week / By Month:** Use a compact matrix with a row per task,
+  day totals, hover descriptions, aggregate hours and project/task suggestions
+  when adding rows. Friday and Saturday are styled in greys; today's header
+  is highlighted separately.
+- **Copy and match:** Match tasks from another day (By Day) or copy/paste
+  day tasks through date-header context menus (By Week / By Month).
+- **Confirm To Odoo:** Drafts, edits and deletions remain local until this
+  explicit action. Undo and Clear Edits operate on pending local changes.
+  Odoo access restrictions and verification/conflict protection remain active.
+- **Preferences:** Light/Dark modes and H.h / HH:mm timesheet display formats.
 
-## Automatic updates
+The **About** window preserves the original Vodoo attribution and colored
+smiley, with the text and smiley centered together.
 
-Vodoo checks for newer **published public releases** automatically on startup. Users can also click **Check Updates** in the main toolbar. Update metadata is read only from the [Vodoo-Releases](https://github.com/mustafahafaec-spec/Vodoo-Releases) GitHub Releases feed, not from Odoo or the source repository.
+## Supported protocols and limits
 
-Only strictly newer public versions (for example, v0.1.1 after v0.1.0) qualify. Internal maintenance identifiers, alpha/beta versions, draft releases and prereleases are ignored. The installer must be named `Vodoo_Setup_vX.Y.Z.exe`, hosted at the exact official release URL, and provide a GitHub SHA-256 asset digest. Vodoo verifies the streamed download's size and hash before saving it as a launchable executable. Corrupt or unverifiable downloads are rejected. Verified installers are cached under `%LOCALAPPDATA%\Vodoo\Updates` and checked again before reuse.
+- Windows 10 or 11, x64.
+- Odoo 19+ over JSON-2 or Odoo 16–18 over XML-RPC, both via HTTPS and subject to
+  the connected employee's Odoo permissions and API access.
+- The program may cap exceptionally large server result sets to protect
+  responsiveness. If a range is truncated, review the displayed status before
+  acting on totals.
 
-**Updating is opt-in:** Vodoo asks before downloading or launching the installer. The tool will not install while an Odoo operation is busy or the user has unconfirmed timesheet drafts or pending deletions. If new draft work appears during download, installation is deferred. The existing per-user Inno Setup installer is launched only after verification; user settings and Windows Credential Manager entries are preserved. GitHub update requests do not include Odoo API credentials.
+## Development / build from source
 
-A released installer must reuse the existing installation AppId and path. If the releases repository has no published installer newer than the installed public version, the application reports that no newer update is available. Source-repository development does not automatically publish an installer into the Releases repository.
+For source development, use Visual Studio 2022 with .NET 8 Windows desktop
+tools, .NET 8 SDK, and Inno Setup 6 for installer compilation.
 
-## Visual Studio build and Inno Setup
+- `Build Vodoo.bat` builds the Release solution, publishes Full and Lite
+  variants into separate folders, and generates both Inno Setup scripts.
+- `Build Vodoo Installer.bat` builds and compiles both installer executables,
+  then runs `scripts/Measure-InstallerSize.ps1` to report actual sizes and
+  the measured Lite/Full size reduction.
+- `Publish Windows EXE.bat` publishes both application editions without
+  compiling an installer.
+- `dotnet run --project tests/Vodoo.App.UISmokeTests -c Debug` exercises
+  UI smoke assertions on Windows.
+- `dotnet run --project tests/Vodoo.Core.SmokeTests -c Debug` exercises
+  core protocol and timesheet tests.
 
-1. Open `Vodoo.sln` and select **Release | Any CPU**.
-2. A **Release Build** automatically creates `artifacts\installer\Vodoo_v0.1.0.iss` by running `scripts\Generate-InnoSetup.ps1` on Windows.
-3. Run **`Build Vodoo.bat`** to build and publish a self-contained `win-x64` payload into `artifacts\publish\win-x64`, then regenerate the `.iss` for that payload. Alternatively, `Publish Windows EXE.bat` performs publish and script generation.
-4. Open `artifacts\installer\Vodoo_v0.1.0.iss` using **Inno Setup 6** and click **Compile**. The installer will be written to `artifacts\installers\Vodoo_Setup_v0.1.0.exe`.
-5. The static reference installer script `installer\Vodoo_v0.1.0.iss` is also in source control; it points to the same publish folder using its own relative path. Prefer the generated artifact after a successful publish.
+The application uses an untrimmed Release publish; trimming Windows Forms and
+reflection-based flows has not been validated and must not be enabled simply
+to shrink the package. Debug symbols are excluded from installer payloads.
+Only published runtime files are packaged; source, Development Notes and
+local secrets are not installed.
 
-The installer is a per-user installation under `%LOCALAPPDATA%\Programs\Vodoo`, so it does not require administrator rights. The self-contained publish folder includes runtime dependencies; neither source code nor internal Development Notes are installed. The installer does not deliberately remove the local application settings, favorites, theme choice, or Windows Credential Manager entry during uninstall/upgrade.
-
-## Build and QA checks
-
-- `dotnet build Vodoo.sln -c Release`
-- `dotnet run --project tests\Vodoo.Core.SmokeTests -c Release`
-- `dotnet run --project tests\Vodoo.App.UISmokeTests -c Release`
-- Test both themes, both tabs, 970×630 and 1320×790 window sizes, DPI changes, keyboard selection, entry create/readback, suggestions, day matching, and installer install/upgrade/uninstall on Windows before distribution.
-
-**Verification status:** The v0.1.0 source was statically inspected in a non-Windows environment without a .NET SDK, Inno Setup, or access to your Odoo instance. Windows compilation, GUI tests, installer compilation, and live Odoo permission / write tests must still be performed before distributing the installer.
-
-## Project structure
-
-- `src/Vodoo.App` — WinForms UI, themes and navigation.
-- `src/Vodoo.Core` — Odoo clients, timesheet rules and local settings.
-- `tests/` — core tests and Windows UI smoke tests.
-- `scripts/Generate-InnoSetup.ps1` — generates the Inno Setup `.iss` for Release builds.
-- `installer/Vodoo_v0.1.0.iss` — source-controlled reference script.
-- `Development Notes/v0.1.x` — development history (not distributed with the installer).
-- `Releases Notes v0.1.0.md` — public release notes.
-
-Credentials are never added to source or installer scripts. The API key, when the user chooses to remember it, is stored in Windows Credential Manager; nonsecret connection settings, favorites, usage history, and theme are saved under `%LOCALAPPDATA%\Vodoo`.
+**Public-release distribution:** The Full installer filename must remain
+`Vodoo_Setup_v0.2.0.exe` to match the current SHA-256-verified public updater.
+The Lite installer has a separate filename and is a manual optional download.
+Preparing this source branch does not itself upload a public installer or
+publish a GitHub Release.
