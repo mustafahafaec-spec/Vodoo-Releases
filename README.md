@@ -1,4 +1,4 @@
-# Vodoo v0.4.0
+# Vodoo v0.4.1
 
 Vodoo is a Windows desktop application for organizing Odoo projects,
 confirmed employee and team timesheets, working-time attendance analysis,
@@ -11,8 +11,8 @@ Windows 10/11, x64. Choose **one** installer:
 
 | Edition | Installer | Runtime |
 | --- | --- | --- |
-| Full / offline | `Vodoo_Setup_v0.4.0.exe` | Self-contained |
-| Lite | `Vodoo_Setup_v0.4.0_Lite.exe` | .NET 8 Desktop Runtime x64 |
+| Full / offline | `Vodoo_Setup_v0.4.1.exe` | Self-contained |
+| Lite | `Vodoo_Setup_v0.4.1_Lite.exe` | .NET 8 Desktop Runtime x64 |
 
 Use the [official Vodoo Releases page](https://github.com/mustafahafaec-spec/Vodoo-Releases)
 to find the latest **published** installer. A source branch is not a
@@ -26,7 +26,7 @@ If coming from v0.2.0 or an earlier client, use the full or Lite installer
 rather than relying on that older client's installer-based updater.
 
 **Runtime support warning:** .NET 8 reached the end of Microsoft support on
-November 10, 2026. The v0.4.0 application and Lite installer retain the
+November 10, 2026. The v0.4.1 application and Lite installer retain the
 existing .NET 8 dependency for compatibility. Deploy only with awareness
 of the support/security implications; a validated migration to a supported
 runtime is required for long-term deployment.
@@ -55,8 +55,15 @@ Holiday.
 
 **Analysis** reads confirmed Odoo hours by project and date. It displays
 working hours, 8-hour daily targets, day-offs measured in **days**, leave
-permissions in hours, and overtime in hours. Use **Export Excel** for an
-editable chart and attendance/timesheet workbook.
+permissions in hours, and overtime in hours.
+
+The **By Project** and **By Task** tabs offer expandable parent/child
+breakdowns: double-click a project to inspect its tasks or a task to see
+its contributing projects. The displayed totals use confirmed Odoo
+entries; expanding children does not double-count parent totals.
+Use **Export Excel** to produce a separately editable chart and
+attendance/timesheet workbook. Every export asks whether to group by
+Project or Task.
 
 ## Manager mode
 
@@ -73,6 +80,16 @@ attendance metrics, team project charts and Excel export.
 **Include myself in the team** is an optional setting for authorized
 managers; it is not a way for employees without reports to enter Manager mode.
 The application's access checks still follow Odoo permissions.
+
+**External Sheet** lets an authorized Manager manually import an encrypted
+productive-time export (`.vds`) shared by an employee. Choose **Import
+encrypted file**, then provide the shared passphrase. An import is
+stored locally under the currently connected manager account; it does
+not upload data to Odoo. Select an imported day and use **Delete selected**
+to remove it from the local Manager list after confirmation. Delete
+also works when there is only one import; the original encrypted `.vds`
+file remains on disk. Employee recordings and Manager imports are not
+automatically synchronized between devices.
 
 ## Attendance policy
 
@@ -104,29 +121,44 @@ automatically synchronized between computers or employees.
 
 ## Excel exports
 
-Both Employee and Manager exports include four worksheets in this order:
+Employee and Manager reports export **five worksheets** in this order:
 
-1. **Analysis Report:** editable project-hour chart and summary; Manager
-   reports also include each member's Working, Target, Days Off (days),
-   Permissions and Overtime alongside the team total.
-2. **Full Detail:** project-summary matrix, with member contributions
-   for Manager reports.
-3. **Attendance:** member and team totals, followed by a Week/Month
-   Timesheet-style date matrix. Manager has separate member/project tables,
-   and Employee has project/task rows.
-4. **Chart Data:** linked source values for the editable chart, placed last.
+1. **Analysis Report:** native editable horizontal bar chart and confirmed
+   hours summary. Manager series show separately colored team-member
+   contributions and per-member attendance totals.
+2. **Breakdown Report:** native horizontal child-contribution chart grouped
+   under parent projects or tasks. Manager child bars are stacked by team
+   member, and parent headings display their cumulative hours without
+   creating duplicate parent bars.
+3. **Full Detail:** individual project/task contribution tables, with
+   member detail in Manager reports.
+4. **Attendance:** Week/Month Timesheet-style date matrix with employee
+   or team attendance, targets, day offs, permissions and overtime.
+5. **Chart Data:** linked source values for the editable Analysis chart.
 
-These reports use **confirmed** Odoo hours, not unsent drafts. The Analysis
-Report is configured for A4 landscape printing. Validate project-name
-axis visibility and page layout in desktop Excel before relying on PDF exports;
-an earlier Alpha export was reported to omit project labels.
+Every Excel export prompts for **By Project** or **By Task**, independently
+of which Analysis tab is currently selected. Both native chart legends
+are placed **above** the plotted bars; workbook titles are merged and
+the source sheet values remain editable. Reports contain confirmed
+Odoo hours only, not unsent drafts. The Analysis Report is configured
+for A4 landscape printing.
+
+**Excel validation notice:** A vertical alignment shift between child
+captions and horizontal bars was reported during private testing.
+The latest source removes synthetic spacer categories and restores
+centered native axis labels, but there is no confirmed successful
+desktop Excel or PDF retest. Check bar-label alignment and exported
+print views before relying on Breakdown Report for formal deliverables.
 
 ## Recording and privacy
 
 The **Recording** tab measures active application/window time locally.
 It supports daily activity history, application icons, task breakdown,
 recovery options and authorized conversion of eligible records into
-Odoo timesheet drafts. It is enabled by default while Vodoo is running,
+Odoo timesheet drafts. **Export Productive Time** creates a manually
+shared, passphrase-protected `.vds` snapshot for Manager External Sheet
+import; exporting does not upload the snapshot or disclose the password.
+It is enabled by default while Vodoo is running,
 including in the notification area, unless disabled under **Options**.
 
 Recording can capture foreground application and window titles that
@@ -142,7 +174,11 @@ the application, with safeguards for pending work.
 
 Official Public updates are retrieved from the Vodoo Releases repository
 as an application-file ZIP, validated using the package manifest, and
-applied after exit with backup/rollback handling. Update ZIPs are not
+applied after exit with backup/rollback handling. An available newer
+public release offers **Update Now / Later**, a progress display and an
+opt-in **Always Update Automatically** preference, which is off by default.
+Updates are deferred if active Odoo operations or unconfirmed timesheet
+changes would make the restart unsafe. Update ZIPs are not
 standalone installers. Private Alpha and Beta versions are excluded from
 ordinary Public update notifications.
 
@@ -159,14 +195,17 @@ dotnet run --project tests/Vodoo.Core.SmokeTests -c Debug
 dotnet run --project tests/Vodoo.App.UISmokeTests -c Debug
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Invoke-ReleasePackaging.ps1 -PreflightOnly
 dotnet build Vodoo.sln -c Release
+dotnet run --project tests/Vodoo.Core.SmokeTests -c Release
+dotnet run --project tests/Vodoo.App.UISmokeTests -c Release
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Test-UpdateHelper.ps1
 ```
 
 The validated Release build invokes the established packaging pipeline
 and should produce these local files in `Releases/`:
 
-- `Vodoo_Setup_v0.4.0.exe`
-- `Vodoo_Setup_v0.4.0_Lite.exe`
-- `Vodoo_Update_v0.4.0.zip`
+- `Vodoo_Setup_v0.4.1.exe`
+- `Vodoo_Setup_v0.4.1_Lite.exe`
+- `Vodoo_Update_v0.4.1.zip`
 - `SHA256SUMS.txt` and `BUILD_INFO.txt`
 
 Inspect and test the actual generated outputs before publication. A GitHub
