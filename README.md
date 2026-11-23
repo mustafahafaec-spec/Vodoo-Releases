@@ -1,4 +1,4 @@
-# Vodoo v0.4.1
+# Vodoo v0.4.2
 
 Vodoo is a Windows desktop application for organizing Odoo projects,
 confirmed employee and team timesheets, working-time attendance analysis,
@@ -7,29 +7,24 @@ account's own permissions.
 
 ## Installation
 
-Windows 10/11, x64. Choose **one** installer:
+Vodoo v0.4.2 targets **Windows 10/11 x64**. After a qualified
+Windows build and official publication, install the self-contained
+`Vodoo_Setup_v0.4.2.exe` Full/offline installer. Check the
+[Vodoo Releases page](https://github.com/mustafahafaec-spec/Vodoo-Releases)
+for actually published assets. A source branch is not a published installer.
 
-| Edition | Installer | Runtime |
-| --- | --- | --- |
-| Full / offline | `Vodoo_Setup_v0.4.1.exe` | Self-contained |
-| Lite | `Vodoo_Setup_v0.4.1_Lite.exe` | .NET 8 Desktop Runtime x64 |
+The Lite installer has been retired for new releases; historical
+already-published Lite assets are not deleted. The Full installer
+preserves the existing per-user AppId/install location. Confirm or
+discard pending Odoo edits before upgrading; local settings, favorites
+and recording histories are intended to survive normal upgrades.
 
-Use the [official Vodoo Releases page](https://github.com/mustafahafaec-spec/Vodoo-Releases)
-to find the latest **published** installer. A source branch is not a
-published installer. Both editions install per Windows user, with the same
-application identity and install location as previous versions.
+Official updates use a verified application-file ZIP, not a second
+50-MB full-installer download.
 
-**Before upgrading**, confirm or discard any pending Odoo timesheet edits.
-Application preferences, favorites and locally stored histories are intended
-to remain in their Windows-user profile locations during upgrades.
-If coming from v0.2.0 or an earlier client, use the full or Lite installer
-rather than relying on that older client's installer-based updater.
-
-**Runtime support warning:** .NET 8 reached the end of Microsoft support on
-November 10, 2026. The v0.4.1 application and Lite installer retain the
-existing .NET 8 dependency for compatibility. Deploy only with awareness
-of the support/security implications; a validated migration to a supported
-runtime is required for long-term deployment.
+**Runtime support:** Vodoo still targets .NET 8; Microsoft support
+ended November 10, 2026. The Full installer bundles the runtime;
+migration to a supported LTS framework requires separate validation.
 
 ## Connect to Odoo
 
@@ -150,63 +145,141 @@ centered native axis labels, but there is no confirmed successful
 desktop Excel or PDF retest. Check bar-label alignment and exported
 print views before relying on Breakdown Report for formal deliverables.
 
-## Recording and privacy
+## Recording sessions, productivity and privacy
 
-The **Recording** tab measures active application/window time locally.
-It supports daily activity history, application icons, task breakdown,
-recovery options and authorized conversion of eligible records into
-Odoo timesheet drafts. **Export Productive Time** creates a manually
-shared, passphrase-protected `.vds` snapshot for Manager External Sheet
-import; exporting does not upload the snapshot or disclose the password.
-It is enabled by default while Vodoo is running,
-including in the notification area, unless disabled under **Options**.
+Recording creates a new **work session** on the first start.
+The session header places **Session started** and **Session ended**
+side by side on the **left**, without a large empty gap. A session
+with no final end timestamp displays exactly **Ongoing**.
+A temporarily stopped, resumable session displays **Paused at** its
+stop time; a finalized session shows its recorded end time.
 
-Recording can capture foreground application and window titles that
-contain sensitive project, document or website information. Local history
-is stored in the current Windows user's scope; review privacy settings
-before enabling it on shared workstations.
+The **Show collective day work** checkbox replaces the former
+All days' sessions tree. OFF: show only one-day session tabs for
+sittings containing **60 minutes or more of actually recorded time**
+(exactly 60 minutes qualifies). Sessions below one hour are not
+shown individually, and none of their time is eligible for new Odoo
+conversions.
 
-## Window controls and updates
+ON: ignore individual sessions and show the **entire selected day**
+in the table, Pie Chart, Stacked Bars and CSV export. Under-hour
+sessions are totaled in one non-productive **Idle time / Sessions
+under 1 hour** row. This temporary view does not delete or edit
+the underlying session records, task history, conversion states
+or pending Odoo writes. Excel productive export offers only qualifying
+individual sessions. The checkbox remains visible and can be
+unchecked while collective-day work is displayed; only the session
+tabs disappear. The preference is saved per account, defaults OFF
+and does not inherit the old all-days preference.
 
-Options provide hours formatting, start with Windows, close-to-tray,
-and recording controls. The tray menu can restore or explicitly exit
-the application, with safeguards for pending work.
+**Historical recordings:** On first opening the Recording tab, Vodoo
+migrates older account-local ActivityHistory.json entries into sessions.
+It reads existing local Vodoo recording/project diagnostic log timestamps
+to identify verified recording start/stop windows. Surviving individually
+timed task entries can also reveal distinct sittings separated by at least
+45 minutes when log files are missing. Earlier cumulative app/day records
+sometimes span multiple sittings without retaining their individual
+timeline; those are kept *intact* in clearly identified historical
+combined sessions. Vodoo never invents splits or reallocates Odoo time.
+The original pre-migration history is preserved under a dated local
+backup, and the new session IDs are retained across restarts. This
+migration does not upload diagnostic logs or recorded activity.
 
-Official Public updates are retrieved from the Vodoo Releases repository
-as an application-file ZIP, validated using the package manifest, and
-applied after exit with backup/rollback handling. An available newer
-public release offers **Update Now / Later**, a progress display and an
-opt-in **Always Update Automatically** preference, which is off by default.
-Updates are deferred if active Odoo operations or unconfirmed timesheet
-changes would make the restart unsafe. Update ZIPs are not
-standalone installers. Private Alpha and Beta versions are excluded from
-ordinary Public update notifications.
+**Viewing and actions:** With collective mode OFF, table, charts, CSV and
+Odoo actions use the selected qualifying session. With it ON, they
+show the selected calendar day; Odoo conversions still exclude
+short-session work. Excel workbook export lists qualifying sessions
+as separate worksheets. The Manager `.vds` format remains day-scoped.
+
+Idle rules are evaluated on each recording tick:
+- 30 seconds with no mouse cursor movement;
+- 60 seconds without a click/keystroke AND without scrolling;
+- 120 seconds without click/keystroke, after recording has run 120
+  seconds (even when scrolling or cursor movement continues).
+
+Any of these rules marks the sample idle. A continuous idle stretch
+shorter than 45 minutes stays recorded as non-productive. At **45
+continuous idle minutes since the last recorded work**, the ENTIRE
+trailing idle stretch is removed and the current session ends at its
+last recorded work. Work or a verified active meeting starts a new session
+after that cutoff. Confirmed background calls retain their priority.
+
+**Stop / exit / reopen:** Stopping recording or actually exiting Vodoo
+temporarily pauses the sitting. If recording resumes (including after
+Vodoo restarts) **less than 45 minutes after the last recorded work**
+and still on the same local date, it keeps the **same session ID and
+original start time**. The time between the stop/exit and restart is
+counted as non-productive idle. If 45 minutes or more have elapsed
+since the last recorded work, the previous sitting ends at the last
+recorded work, any trailing idle time is excluded, and Vodoo starts
+a **new session**. Merely minimizing the window into the system tray
+does not stop the recorder. Restored historic reconstructed sittings
+are never reopened or modified. A session does not continue across
+a local midnight boundary.
+
+Ordinary applications require five cumulative minutes of recorded
+activity before qualifying as productive. Short tasks are merely
+grouped in the Table under Various Tasks; users can mark specific apps
+or tasks non-productive and choose Show all tasks. The Stacked Bars
+time-display filter has been removed: **Pie Chart and Stacked Bars**
+now use the same full productive data without hiding short productive
+tasks.
+
+**Export Productive Time** opens a session checklist. Select sessions
+and export **Excel (.xlsx)**: each checked session gets an individual
+worksheet with session timestamps and productive application/task time.
+Excel sheet names use a valid `dd-MM-yy Session N` format (Excel
+prohibits the brackets and slash used in the on-screen tab names).
+The encrypted `.vds` export route remains available in that dialog
+for secure Manager External Sheet imports; `.vds` is still day-scoped.
+
+Activity history stores foreground app/window titles and timing, not
+keystrokes or screenshot contents. Information may include sensitive
+project/document names. Local account-scoped session metadata and
+recordings remain on the Windows user's computer. Preferences can
+disable recording when the application is open or in the tray.
+
+## Window controls and official updates
+
+Options cover theme, hours format, start with Windows, close-to-tray,
+recording and automatic-update preferences. The tray menu restores
+or explicitly exits Vodoo.
+
+**Check Updates** on a Public build checks the official Public feed.
+A newer verified release offers **Update Now / Later**, progress,
+SHA-256/manifest verification and post-exit staging/replacement with
+backup/rollback. **Always Update Automatically** is opt-in and
+off by default. Pending unsent timesheets and active Odoo operations
+defer unsafe restarts. Private Alpha/Beta releases are excluded from
+normal Public update notifications. The ZIP is an application-file
+update, not an installer.
 
 ## Build and release qualification (Windows)
 
-The authoritative product identity is `Directory.Build.props`.
-Use Visual Studio 2022, .NET 8 SDK, PowerShell and Inno Setup 6.
-
-Run from the repository root:
+Use Windows 10/11 x64, Visual Studio 2022, .NET 8 SDK, Windows
+PowerShell and Inno Setup 6. From the repository root:
 
 ```powershell
 dotnet build Vodoo.sln -c Debug
 dotnet run --project tests/Vodoo.Core.SmokeTests -c Debug
 dotnet run --project tests/Vodoo.App.UISmokeTests -c Debug
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Invoke-ReleasePackaging.ps1 -PreflightOnly
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Invoke-ReleasePackaging.ps1 -ExpectedVersion 0.4.2 -PreflightOnly
 dotnet build Vodoo.sln -c Release
 dotnet run --project tests/Vodoo.Core.SmokeTests -c Release
 dotnet run --project tests/Vodoo.App.UISmokeTests -c Release
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Test-UpdateHelper.ps1
 ```
 
-The validated Release build invokes the established packaging pipeline
-and should produce these local files in `Releases/`:
+Successful Windows Public-channel Release builds automatically
+prepare these **expected local output filenames** in `Releases/`:
 
-- `Vodoo_Setup_v0.4.1.exe`
-- `Vodoo_Setup_v0.4.1_Lite.exe`
-- `Vodoo_Update_v0.4.1.zip`
-- `SHA256SUMS.txt` and `BUILD_INFO.txt`
+- `Vodoo_Setup_v0.4.2.exe` — Full/self-contained installer.
+- `Vodoo_Update_v0.4.2.zip` — verified app-file updater.
+- `SHA256SUMS.txt` and `BUILD_INFO.txt` — integrity/provenance.
 
-Inspect and test the actual generated outputs before publication. A GitHub
-source branch or successful compilation alone does not publish a release.
+These outputs are not present in source control. Verify Full install
+and upgrade from v0.4.1, data/settings preservation, 45-minute
+session continuity, UI themes/DPI, Odoo permissions, Excel alignment,
+updater rollback and actual SHA-256 before publication. No recording
+performance gain is claimed without real Windows measurement.
+
