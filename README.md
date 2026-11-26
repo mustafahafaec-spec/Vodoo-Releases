@@ -1,30 +1,31 @@
-# Vodoo v0.4.2
+# Vodoo v0.4.3
 
 Vodoo is a Windows desktop application for organizing Odoo projects,
 confirmed employee and team timesheets, working-time attendance analysis,
 and locally recorded computer activity. It uses the authenticated Odoo
 account's own permissions.
 
-## Installation
+## Installation and status
 
-Vodoo v0.4.2 targets **Windows 10/11 x64**. After a qualified
-Windows build and official publication, install the self-contained
-`Vodoo_Setup_v0.4.2.exe` Full/offline installer. Check the
-[Vodoo Releases page](https://github.com/mustafahafaec-spec/Vodoo-Releases)
-for actually published assets. A source branch is not a published installer.
+Vodoo v0.4.3 is a Public-channel Windows 10/11 x64 application. The
+self-contained Full installer is named `Vodoo_Setup_v0.4.3.exe` and
+the app-files-only incremental ZIP is `Vodoo_Update_v0.4.3.zip`.
+These filenames identify required qualified release artifacts,
+not files already built by this source commit. Actual published
+downloads are available at the
+[Vodoo Releases repository](https://github.com/mustafahafaec-spec/Vodoo-Releases)
+only after distribution.
 
-The Lite installer has been retired for new releases; historical
-already-published Lite assets are not deleted. The Full installer
-preserves the existing per-user AppId/install location. Confirm or
-discard pending Odoo edits before upgrading; local settings, favorites
-and recording histories are intended to survive normal upgrades.
+The Lite installer remains retired for new releases. Historical
+Lite installers already published are not deleted. The Full edition
+retains the established per-user AppId/install path. Complete or
+cancel pending Odoo changes before upgrading; local recordings,
+session identity, archived days, preferences and user settings
+must survive ordinary upgrades.
 
-Official updates use a verified application-file ZIP, not a second
-50-MB full-installer download.
-
-**Runtime support:** Vodoo still targets .NET 8; Microsoft support
-ended November 10, 2026. The Full installer bundles the runtime;
-migration to a supported LTS framework requires separate validation.
+**Runtime support:** Vodoo still targets .NET 8. Microsoft support
+ended November 10, 2026; Full installers bundle the runtime, but a
+supported-LTS migration requires separately verified compatibility.
 
 ## Connect to Odoo
 
@@ -172,6 +173,17 @@ unchecked while collective-day work is displayed; only the session
 tabs disappear. The preference is saved per account, defaults OFF
 and does not inherit the old all-days preference.
 
+**Calendar context menu:** Right-click a date in Recording Calendar
+(or press the keyboard context-menu key on the selected date) and
+choose **Clear day recordings...**. The action applies to the date
+clicked, not another currently selected date. It requires typing
+`CLEAR` and safely archives local activity rather than deleting it.
+Cleared days are recoverable under **Options > Restore recording day**.
+Days without recorded activity, dates with pending Odoo conversions
+and the currently active recording day cannot be cleared until
+those conditions are resolved. No other days or Odoo entries are
+modified.
+
 **Historical recordings:** On first opening the Recording tab, Vodoo
 migrates older account-local ActivityHistory.json entries into sessions.
 It reads existing local Vodoo recording/project diagnostic log timestamps
@@ -241,45 +253,48 @@ disable recording when the application is open or in the tray.
 
 ## Window controls and official updates
 
-Options cover theme, hours format, start with Windows, close-to-tray,
-recording and automatic-update preferences. The tray menu restores
-or explicitly exits Vodoo.
+Options include theme, hours format, Windows startup, close-to-tray,
+recording and optional automatic-update preferences. The system
+tray menu restores or explicitly exits the application.
 
-**Check Updates** on a Public build checks the official Public feed.
-A newer verified release offers **Update Now / Later**, progress,
-SHA-256/manifest verification and post-exit staging/replacement with
-backup/rollback. **Always Update Automatically** is opt-in and
-off by default. Pending unsent timesheets and active Odoo operations
-defer unsafe restarts. Private Alpha/Beta releases are excluded from
-normal Public update notifications. The ZIP is an application-file
-update, not an installer.
+Public **Check Updates** searches the official Public feed and
+accepts only newer verified releases. A valid update can show
+Update Now/Later, progress and digest/manifest validation before
+staged post-exit replacement with recovery/rollback. Automatic
+updates are opt-in and off by default. Pending Odoo writes and
+active Odoo operations must not force an unsafe restart. Alpha/Beta
+tags are excluded from normal Public update discovery.
 
-## Build and release qualification (Windows)
+The update ZIP contains application files only; it does not
+download or rerun the Full installer.
 
-Use Windows 10/11 x64, Visual Studio 2022, .NET 8 SDK, Windows
+## Windows build and Public release qualification
+
+Use Windows 10/11 x64, .NET 8 SDK, Visual Studio 2022, Windows
 PowerShell and Inno Setup 6. From the repository root:
 
 ```powershell
 dotnet build Vodoo.sln -c Debug
 dotnet run --project tests/Vodoo.Core.SmokeTests -c Debug
 dotnet run --project tests/Vodoo.App.UISmokeTests -c Debug
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Invoke-ReleasePackaging.ps1 -ExpectedVersion 0.4.2 -PreflightOnly
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Invoke-ReleasePackaging.ps1 -ExpectedVersion 0.4.3 -PreflightOnly
 dotnet build Vodoo.sln -c Release
 dotnet run --project tests/Vodoo.Core.SmokeTests -c Release
 dotnet run --project tests/Vodoo.App.UISmokeTests -c Release
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Test-UpdateHelper.ps1
 ```
 
-Successful Windows Public-channel Release builds automatically
-prepare these **expected local output filenames** in `Releases/`:
+A qualified Public Release solution build uses the existing
+Full-only pipeline to produce expected files under `Releases/`:
+`Vodoo_Setup_v0.4.3.exe`, `Vodoo_Update_v0.4.3.zip`,
+`SHA256SUMS.txt` and `BUILD_INFO.txt`.
 
-- `Vodoo_Setup_v0.4.2.exe` — Full/self-contained installer.
-- `Vodoo_Update_v0.4.2.zip` — verified app-file updater.
-- `SHA256SUMS.txt` and `BUILD_INFO.txt` — integrity/provenance.
-
-These outputs are not present in source control. Verify Full install
-and upgrade from v0.4.1, data/settings preservation, 45-minute
-session continuity, UI themes/DPI, Odoo permissions, Excel alignment,
-updater rollback and actual SHA-256 before publication. No recording
-performance gain is claimed without real Windows measurement.
+Those are local build outputs, not included source files.
+Before publication, validate setup fresh/upgrade from published
+v0.4.2, local data preservation, Odoo manager permissions,
+By Day/Week/Month invalid Project/Task editing and subsequent
+valid selection, Recording calendar right-click target, typed
+CLEAR/restore, pending Odoo safeguards, themes/DPI, hashes,
+staged updater restart and rollback. No runtime build or UI
+success is claimed merely from source synchronization.
 
